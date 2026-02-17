@@ -1,14 +1,12 @@
 # Trip Reminders API
 
-A Rails API backend for managing trip reminders with Sidekiq background jobs.
+A Rails API backend for managing trip reminders.
 
 ## Features
 
 - RESTful API for managing trips (create, list, delete)
 - PostgreSQL database
 - Sidekiq for background job processing
-- Scheduled daily job to find trips in the next 7 days
-- Digest job that logs trip reminders (can be extended to send emails)
 
 ## Prerequisites
 
@@ -80,20 +78,6 @@ The API runs on `http://localhost:3000` by default.
 - `GET /trips/:id` - Get a specific trip
 - `DELETE /trips/:id` - Delete a trip
 
-### Testing Sidekiq Jobs
-
-**Manual trigger (Rails console):**
-```bash
-rails console
-> TripDigestSchedulerJob.perform_now
-```
-
-**Check Sidekiq web UI:**
-Visit `http://localhost:3000/sidekiq` (if configured) or check logs.
-
-**Scheduled job:**
-The `TripDigestSchedulerJob` runs daily at 8:00 AM (configured in `config/sidekiq.yml`). It finds all trips in the next 7 days and enqueues a `TripDigestJob` that logs the trip reminders.
-
 ## Project Structure
 
 ```
@@ -102,14 +86,10 @@ app/
     trips_controller.rb    # REST API endpoints
   models/
     trip.rb                # Trip model with validations and scopes
-  jobs/
-    trip_digest_scheduler_job.rb  # Scheduled job (runs daily)
-    trip_digest_job.rb            # Digest job (logs reminders)
 config/
   initializers/
     cors.rb                # CORS configuration for React frontend
     sidekiq.rb             # Sidekiq configuration
-  sidekiq.yml              # Scheduled jobs configuration
 db/
   migrate/
     20240217000001_create_trips.rb  # Trips table migration
@@ -121,5 +101,4 @@ db/
 
 ## Notes
 
-- The digest job currently logs to Rails logger. In production, you would extend this to send emails using ActionMailer.
 - CORS is configured to allow requests from `http://localhost:5173` (Vite default) and `http://localhost:3000`.

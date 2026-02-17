@@ -7,9 +7,9 @@ A full-stack application for managing trip reminders, built with Ruby on Rails, 
 This project demonstrates a simple but complete application using:
 - **Rails API** — RESTful backend with PostgreSQL
 - **TanStack Start** — Full-stack React framework with file-based routing, SSR, and TypeScript
-- **Sidekiq** — Background job processing with scheduled tasks
+- **Sidekiq** — Background job processing
 
-Users can register trips with a destination, date, and optional notes. A Sidekiq job runs daily to find trips in the next 7 days and generates reminder digests.
+Users can register trips with a destination, date, and optional notes.
 
 ## Project Structure
 
@@ -131,26 +131,6 @@ The frontend will be available at `http://localhost:5173`.
 - `GET /trips/:id` — Get a specific trip
 - `DELETE /trips/:id` — Delete a trip
 
-## Background Jobs
-
-### Scheduled Job
-
-The `TripDigestSchedulerJob` runs daily at 8:00 AM (configured in `config/sidekiq.yml`). It:
-- Finds all trips with dates in the next 7 days
-- Enqueues a `TripDigestJob` to process them
-
-### Digest Job
-
-The `TripDigestJob` logs trip reminders to the Rails logger. In production, this would be extended to send emails via ActionMailer.
-
-### Manual Trigger
-
-```bash
-cd trip_reminders_api
-rails console
-> TripDigestSchedulerJob.perform_now
-```
-
 ## Environment Variables
 
 **Backend:**
@@ -176,7 +156,7 @@ docker-compose down -v
 
 - **Ruby on Rails 8.1** — API framework
 - **PostgreSQL** — Database
-- **Sidekiq + sidekiq-cron** — Background jobs and scheduling
+- **Sidekiq** — Background jobs
 - **rack-cors** — CORS handling
 - **TanStack Start** — Full-stack React framework (SSR, file-based routing)
 - **TanStack Router** — Type-safe client-side routing
