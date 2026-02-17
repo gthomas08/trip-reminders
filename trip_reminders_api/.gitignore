@@ -1,0 +1,28 @@
+# Logs
+log/*.log
+
+# Temp files
+tmp/
+*.swp
+*~
+
+# Local storage
+storage/
+
+# Environment files
+.env
+.env.local
+.env*.local
+
+# Credentials / keys (keep .enc files, ignore plain secrets)
+config/master.key
+config/credentials/*.key
+.kamal/secrets
+
+# Bundler
+.bundle/
+vendor/bundle/
+
+# OS
+.DS_Store
+Thumbs.db
