@@ -1,13 +1,13 @@
 # Trip Reminders
 
-A full-stack application for managing trip reminders, built with Ruby on Rails, React, and Sidekiq.
+A full-stack application for managing trip reminders, built with Ruby on Rails, TanStack Start, and Sidekiq.
 
 ## Overview
 
 This project demonstrates a simple but complete application using:
-- **Rails API** - RESTful backend with PostgreSQL
-- **React** - Modern frontend with Vite
-- **Sidekiq** - Background job processing with scheduled tasks
+- **Rails API** — RESTful backend with PostgreSQL
+- **TanStack Start** — Full-stack React framework with file-based routing, SSR, and TypeScript
+- **Sidekiq** — Background job processing with scheduled tasks
 
 Users can register trips with a destination, date, and optional notes. A Sidekiq job runs daily to find trips in the next 7 days and generates reminder digests.
 
@@ -15,23 +15,29 @@ Users can register trips with a destination, date, and optional notes. A Sidekiq
 
 ```
 .
-├── docker-compose.yml          # Infrastructure (PostgreSQL, Redis)
-├── trip_reminders_api/          # Rails API backend
+├── docker-compose.yml              # Infrastructure (PostgreSQL, Redis)
+├── trip_reminders_api/              # Rails API backend
 │   ├── app/
-│   │   ├── controllers/        # REST API endpoints
-│   │   ├── models/             # Trip model
-│   │   └── jobs/               # Sidekiq jobs
+│   │   ├── controllers/            # REST API endpoints
+│   │   ├── models/                 # Trip model
+│   │   └── jobs/                   # Sidekiq jobs
 │   ├── config/
-│   │   ├── initializers/       # CORS, Sidekiq config
-│   │   └── sidekiq.yml         # Scheduled jobs
+│   │   ├── initializers/           # CORS, Sidekiq config
+│   │   └── sidekiq.yml             # Scheduled jobs
 │   └── db/
-│       └── migrate/            # Database migrations
+│       └── migrate/                # Database migrations
 │
-└── trip_reminders_frontend/     # React frontend
+└── trip_reminders_frontend/         # TanStack Start frontend
     ├── src/
-    │   ├── api/                # API service functions
-    │   ├── components/         # React components
-    │   └── App.jsx             # Main app
+    │   ├── api/
+    │   │   └── trips.ts            # Typed API client
+    │   ├── components/
+    │   │   └── Header.tsx          # App header
+    │   ├── routes/
+    │   │   ├── __root.tsx          # Root layout
+    │   │   └── index.tsx           # Trips dashboard
+    │   └── styles.css
+    ├── vite.config.ts
     └── package.json
 ```
 
@@ -70,8 +76,8 @@ bundle install
 rails db:create
 rails db:migrate
 
-# Start Rails server (terminal 1)
-rails server
+# Start Rails server (terminal 1) — runs on port 3000
+rails s
 
 # Start Sidekiq worker (terminal 2)
 bundle exec sidekiq
@@ -79,7 +85,14 @@ bundle exec sidekiq
 
 The API will be available at `http://localhost:3000`.
 
-**Sidekiq Web UI**: Visit `http://localhost:3000/sidekiq` to monitor background jobs.
+**Sidekiq Web UI**: Visit `http://localhost:3000/sidekiq` (login: `admin` / `admin`) to monitor background jobs.
+
+Alternatively, use Foreman to run both Rails and Sidekiq together:
+
+```bash
+gem install foreman
+foreman start
+```
 
 ### 3. Frontend Setup
 
@@ -89,7 +102,7 @@ cd trip_reminders_frontend
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server — runs on port 5173
 npm run dev
 ```
 
@@ -97,15 +110,15 @@ The frontend will be available at `http://localhost:5173`.
 
 ## Usage
 
-1. Open the frontend in your browser (`http://localhost:5173`)
-2. Add trips using the form (destination, date, optional notes)
-3. View all your trips in the list
-4. Delete trips by clicking the "Delete" button
+1. Open the app at `http://localhost:5173`
+2. Click **Add Trip** to create a trip (destination, date, optional notes)
+3. View all trips sorted by date with upcoming/past badges
+4. Delete trips with the trash icon on each card
 
 ## API Endpoints
 
-- `GET /trips` - List all trips
-- `POST /trips` - Create a new trip
+- `GET /trips` — List all trips (ordered by date ascending)
+- `POST /trips` — Create a new trip
   ```json
   {
     "trip": {
@@ -115,8 +128,8 @@ The frontend will be available at `http://localhost:5173`.
     }
   }
   ```
-- `GET /trips/:id` - Get a specific trip
-- `DELETE /trips/:id` - Delete a trip
+- `GET /trips/:id` — Get a specific trip
+- `DELETE /trips/:id` — Delete a trip
 
 ## Background Jobs
 
@@ -128,11 +141,9 @@ The `TripDigestSchedulerJob` runs daily at 8:00 AM (configured in `config/sideki
 
 ### Digest Job
 
-The `TripDigestJob` logs trip reminders to the Rails logger. In production, you would extend this to send emails via ActionMailer.
+The `TripDigestJob` logs trip reminders to the Rails logger. In production, this would be extended to send emails via ActionMailer.
 
-### Manual Testing
-
-To manually trigger the digest job:
+### Manual Trigger
 
 ```bash
 cd trip_reminders_api
@@ -140,29 +151,16 @@ rails console
 > TripDigestSchedulerJob.perform_now
 ```
 
-## Development
-
-### Running Both Rails and Sidekiq
-
-You can use Foreman to run both Rails and Sidekiq together:
-
-```bash
-cd trip_reminders_api
-gem install foreman
-foreman start
-```
-
-This uses the `Procfile` to start both services.
-
-### Environment Variables
+## Environment Variables
 
 **Backend:**
-- `REDIS_URL` - Redis connection URL (default: `redis://localhost:6379/0`)
-- `DATABASE_HOST` - PostgreSQL host (default: `localhost`)
-- `DATABASE_PORT` - PostgreSQL port (default: `5432`)
+- `REDIS_URL` — Redis connection URL (default: `redis://localhost:6379/0`)
+- `DATABASE_HOST` — PostgreSQL host (default: `localhost`)
+- `DATABASE_PORT` — PostgreSQL port (default: `5432`)
 
 **Frontend:**
-- `VITE_API_BASE_URL` - Backend API URL (default: `http://localhost:3000`)
+
+The API base URL is configured in `src/api/trips.ts` (default: `http://localhost:3000`).
 
 ### Stopping Infrastructure
 
@@ -170,19 +168,22 @@ This uses the `Procfile` to start both services.
 # Stop services
 docker-compose down
 
-# Stop and remove volumes (clears data)
+# Stop and remove volumes (clears all data)
 docker-compose down -v
 ```
 
 ## Technologies Used
 
-- **Ruby on Rails 8.1** - API framework
-- **PostgreSQL** - Database
-- **Sidekiq** - Background job processing
-- **sidekiq-cron** - Scheduled jobs
-- **React 19** - Frontend framework
-- **Vite** - Build tool
-- **rack-cors** - CORS handling
+- **Ruby on Rails 8.1** — API framework
+- **PostgreSQL** — Database
+- **Sidekiq + sidekiq-cron** — Background jobs and scheduling
+- **rack-cors** — CORS handling
+- **TanStack Start** — Full-stack React framework (SSR, file-based routing)
+- **TanStack Router** — Type-safe client-side routing
+- **React 19** — UI library
+- **TypeScript** — End-to-end type safety
+- **Tailwind CSS v4** — Styling
+- **Vite** — Build tool
 
 ## Next Steps
 
@@ -190,4 +191,4 @@ docker-compose down -v
 - Implement email notifications via ActionMailer
 - Add trip editing functionality
 - Add filtering and sorting
-- Add tests (Minitest for Rails, Jest/Vitest for React)
+- Add tests (Minitest for Rails, Vitest for frontend)
