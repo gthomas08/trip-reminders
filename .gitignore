@@ -1,0 +1,13 @@
+# Rails API
+trip_reminders_api/log/*.log
+trip_reminders_api/tmp/
+trip_reminders_api/storage/
+
+# Frontend
+trip_reminders_frontend/node_modules/
+trip_reminders_frontend/.env.local
+trip_reminders_frontend/.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
