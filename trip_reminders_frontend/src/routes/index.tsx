@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Plane,
   Plus,
@@ -10,8 +10,15 @@ import {
   X,
   Loader2,
   AlertCircle,
+  User,
+  CheckCircle,
+  RefreshCw,
 } from 'lucide-react'
 import { fetchTrips, createTrip, deleteTrip, type Trip } from '@/api/trips'
+import {
+  generateTravelerProfile,
+  getTravelerProfileStatus,
+} from '@/api/profile'
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -156,6 +163,11 @@ function TripsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Traveler Profile Panel ───────────────────────────── */}
+      <div className="max-w-5xl mx-auto px-6 pt-8">
+        <TravelerProfilePanel />
       </div>
 
       {/* ── Trip List ────────────────────────────────────────── */}
@@ -451,6 +463,146 @@ function CreateTripModal({
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  )
+}
+
+// ─── Traveler Profile Panel ────────────────────────────────────────────────────
+
+type PanelState = 'idle' | 'running' | 'complete'
+
+function TravelerProfilePanel() {
+  const [state, setState] = useState<PanelState>('idle')
+  const [profile, setProfile] = useState<string | null>(null)
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const stopPolling = () => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current)
+      pollRef.current = null
+    }
+  }
+
+  useEffect(() => {
+    return () => stopPolling()
+  }, [])
+
+  const handleGenerate = async () => {
+    setState('running')
+    setProfile(null)
+    setGeneratedAt(null)
+
+    try {
+      await generateTravelerProfile()
+    } catch {
+      setState('idle')
+      return
+    }
+
+    pollRef.current = setInterval(async () => {
+      try {
+        const status = await getTravelerProfileStatus()
+        if (status.status === 'complete') {
+          stopPolling()
+          setProfile(status.profile)
+          setGeneratedAt(status.generated_at)
+          setState('complete')
+        }
+      } catch {
+        stopPolling()
+        setState('idle')
+      }
+    }, 1000)
+  }
+
+  const handleRegenerate = () => {
+    stopPolling()
+    setState('idle')
+    setProfile(null)
+    setGeneratedAt(null)
+  }
+
+  return (
+    <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden mb-2">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/60">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 bg-violet-500/15 rounded-lg border border-violet-500/20">
+            <User className="w-4 h-4 text-violet-400" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-white">
+              Traveler Profile
+            </h2>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Background job — simulates an external API call
+            </p>
+          </div>
+        </div>
+
+        {state === 'complete' && (
+          <button
+            onClick={handleRegenerate}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white border border-slate-600 hover:border-slate-500 rounded-lg transition-colors cursor-pointer"
+          >
+            <RefreshCw size={12} />
+            Regenerate
+          </button>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="px-5 py-5">
+        {state === 'idle' && (
+          <div className="flex flex-col items-center py-4 gap-3 text-center">
+            <p className="text-sm text-slate-400 max-w-sm">
+              Generate a traveler profile by enqueuing a background job. The
+              job simulates an external API call and returns when done.
+            </p>
+            <button
+              onClick={handleGenerate}
+              className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-violet-600/20 cursor-pointer"
+            >
+              <User size={15} />
+              Generate Traveler Profile
+            </button>
+          </div>
+        )}
+
+        {state === 'running' && (
+          <div className="flex flex-col items-center py-6 gap-3">
+            <Loader2 className="w-8 h-8 text-violet-400 animate-spin" />
+            <p className="text-sm font-medium text-slate-300">
+              Generating profile...
+            </p>
+            <p className="text-xs text-slate-500">
+              Job is running in the background
+            </p>
+          </div>
+        )}
+
+        {state === 'complete' && profile && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-green-400">
+              <CheckCircle size={16} />
+              <span className="text-sm font-medium">Profile generated</span>
+              {generatedAt && (
+                <span className="text-xs text-slate-500 ml-auto">
+                  {new Date(generatedAt).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+            <div className="bg-slate-900/60 rounded-lg border border-slate-700/50 px-4 py-4 space-y-3">
+              {profile.split('\n\n').map((paragraph, i) => (
+                <p key={i} className="text-sm text-slate-300 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

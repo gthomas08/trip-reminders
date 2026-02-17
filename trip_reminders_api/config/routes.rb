@@ -20,4 +20,8 @@ Rails.application.routes.draw do
 
   # Trip resources
   resources :trips, only: [:index, :show, :create, :destroy]
+
+  # Traveler profile background job showcase
+  post "traveler_profile/generate", to: "traveler_profile#generate"
+  get  "traveler_profile/status",   to: "traveler_profile#status"
 end
