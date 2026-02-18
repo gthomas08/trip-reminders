@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import {
   Plane,
@@ -49,11 +49,7 @@ export const Route = createFileRoute('/')({
       throw redirect({ to: '/signin' })
     }
   },
-  loader: async () => {
-    if (typeof window === 'undefined') return { trips: [] }
-    const trips = await fetchTrips()
-    return { trips }
-  },
+  loader: async () => ({}),
   errorComponent: LoaderError,
   component: TripsPage,
 })
@@ -87,14 +83,16 @@ function daysUntil(dateStr: string): number {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 function TripsPage() {
-  const { trips } = Route.useLoaderData()
-  const router = useRouter()
-
+  const [trips, setTrips] = useState<Trip[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [form, setForm] = useState({ destination: '', trip_date: '', notes: '' })
+
+  useEffect(() => {
+    fetchTrips().then(setTrips).catch(() => {})
+  }, [])
 
   const upcomingTrips = trips.filter((t: Trip) => isUpcoming(t.trip_date))
   const nextTrip: Trip | undefined = upcomingTrips[0]
@@ -110,9 +108,9 @@ function TripsPage() {
     setIsSubmitting(true)
     setFormError(null)
     try {
-      await createTrip({ ...form, notes: form.notes || undefined })
+      const newTrip = await createTrip({ ...form, notes: form.notes || undefined })
+      setTrips((prev) => [...prev, newTrip])
       setIsModalOpen(false)
-      await router.invalidate()
     } catch (err) {
       setFormError(
         err instanceof Error ? err.message : 'Failed to create trip',
@@ -126,7 +124,7 @@ function TripsPage() {
     setDeletingId(id)
     try {
       await deleteTrip(id)
-      await router.invalidate()
+      setTrips((prev) => prev.filter((t) => t.id !== id))
     } catch {
       // TODO: surface delete errors
     } finally {
@@ -499,9 +497,7 @@ function TravelerProfilePanel() {
 
   const handleRegenerate = () => {
     stopPolling()
-    setState('idle')
-    setTravelerType(null)
-    setGeneratedAt(null)
+    handleGenerate()
   }
 
   return (
