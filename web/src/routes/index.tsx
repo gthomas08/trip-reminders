@@ -187,27 +187,29 @@ function TripsPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        {/* ── Traveler Profile Panel ─────────────────────────── */}
-        <TravelerProfilePanel />
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+          {/* ── Traveler Profile Panel ─────────────────────────── */}
+          <TravelerProfilePanel />
 
-        <Separator />
-
-        {/* ── Trip List ──────────────────────────────────────── */}
-        {trips.length === 0 ? (
-          <EmptyState onAdd={openModal} />
-        ) : (
-          <div className="space-y-3">
-            {trips.map((trip: Trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onDelete={handleDelete}
-                isDeleting={deletingId === trip.id}
-              />
-            ))}
+          {/* ── Trip List ──────────────────────────────────────── */}
+          <div>
+            {trips.length === 0 ? (
+              <EmptyState onAdd={openModal} />
+            ) : (
+              <div className="space-y-3">
+                {trips.map((trip: Trip) => (
+                  <TripCard
+                    key={trip.id}
+                    trip={trip}
+                    onDelete={handleDelete}
+                    isDeleting={deletingId === trip.id}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* ── Create Modal ─────────────────────────────────────── */}
