@@ -1,4 +1,4 @@
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link, useLocation, useRouter } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { Plane, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,13 +7,14 @@ import { signOut, getAuthEmail, isAuthenticated } from '@/api/auth'
 
 export default function Header() {
   const router = useRouter()
+  const { pathname } = useLocation()
   const [authenticated, setAuthenticated] = useState(false)
   const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
     setAuthenticated(isAuthenticated())
     setEmail(getAuthEmail())
-  }, [])
+  }, [pathname])
 
   const handleSignOut = () => {
     signOut()
