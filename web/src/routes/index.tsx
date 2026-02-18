@@ -115,8 +115,9 @@ function TripsPage() {
     setIsSubmitting(true)
     setFormError(null)
     try {
-      const newTrip = await createTrip({ ...form, notes: form.notes || undefined })
-      setTrips((prev) => [...prev, newTrip])
+      await createTrip({ ...form, notes: form.notes || undefined })
+      const updated = await fetchTrips()
+      setTrips(updated)
       setIsModalOpen(false)
     } catch (err) {
       setFormError(

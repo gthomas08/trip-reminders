@@ -4,7 +4,9 @@ class TripsController < ApplicationController
 
   # GET /trips
   def index
-    @trips = current_user.trips.order(trip_date: :asc)
+    @trips = current_user.trips.order(
+      Arel.sql("CASE WHEN trip_date >= CURRENT_DATE THEN 0 ELSE 1 END, trip_date ASC")
+    )
     render json: @trips
   end
 

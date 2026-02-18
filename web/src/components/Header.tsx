@@ -1,15 +1,17 @@
 import { Link, useLocation, useRouter } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { Plane, LogOut } from 'lucide-react'
+import { Plane, LogOut, Sun, Moon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { signOut, getAuthEmail, isAuthenticated } from '@/api/auth'
+import { useTheme } from '@/routes/__root'
 
 export default function Header() {
   const router = useRouter()
   const { pathname } = useLocation()
   const [authenticated, setAuthenticated] = useState(false)
   const [email, setEmail] = useState<string | null>(null)
+  const { theme, toggle } = useTheme()
 
   useEffect(() => {
     setAuthenticated(isAuthenticated())
@@ -47,6 +49,13 @@ export default function Header() {
             </Link>
           </Button>
         </nav>
+
+        {/* Theme toggle */}
+        <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </Button>
+
+        <Separator orientation="vertical" className="h-5" />
 
         {/* Auth actions */}
         <div className="flex items-center gap-2 shrink-0">
