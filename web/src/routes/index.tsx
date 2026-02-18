@@ -155,34 +155,35 @@ function TripsPage() {
                 <h1 className="text-xl font-semibold tracking-tight">
                   My Trips
                 </h1>
-                {nextTrip ? (
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Next up:{' '}
-                    <span className="text-foreground font-medium">
-                      {nextTrip.destination}
-                    </span>{' '}
-                    —{' '}
-                    {daysUntil(nextTrip.trip_date) === 0
-                      ? 'today!'
-                      : `in ${daysUntil(nextTrip.trip_date)} days`}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    No upcoming trips — time to plan one!
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {trips.length > 0 ? (
+                    <>
+                      {trips.length} trip{trips.length !== 1 ? 's' : ''} &middot;{' '}
+                      {upcomingTrips.length} upcoming
+                      {nextTrip && (
+                        <>
+                          {' '}— next:{' '}
+                          <span className="text-foreground font-medium">
+                            {nextTrip.destination}
+                          </span>{' '}
+                          {daysUntil(nextTrip.trip_date) === 0
+                            ? 'today!'
+                            : `in ${daysUntil(nextTrip.trip_date)} days`}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    'No trips yet — time to plan one!'
+                  )}
+                </p>
               </div>
             </div>
 
-            {/* Right: stats + add button */}
-            <div className="flex items-center gap-3">
-              <StatPill value={trips.length} label="Total" />
-              <StatPill value={upcomingTrips.length} label="Upcoming" />
-              <Button onClick={openModal} size="sm">
-                <Plus />
-                Add Trip
-              </Button>
-            </div>
+            {/* Right: add button */}
+            <Button onClick={openModal} size="sm" className="shrink-0">
+              <Plus />
+              Add Trip
+            </Button>
           </div>
         </div>
       </div>
@@ -227,17 +228,6 @@ function TripsPage() {
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
-
-function StatPill({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="text-center px-3 py-1.5 rounded-md border bg-muted/50 min-w-[56px]">
-      <div className="text-lg font-bold leading-tight">{value}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-        {label}
-      </div>
-    </div>
-  )
-}
 
 function TripCard({
   trip,
