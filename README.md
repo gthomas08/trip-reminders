@@ -2,6 +2,8 @@
 
 A full-stack application for managing trip reminders, built with Ruby on Rails, TanStack Start, and Sidekiq.
 
+![Trip Reminders](./docs/screenshots/screenshot.png)
+
 ## Overview
 
 This project demonstrates a complete application using:
