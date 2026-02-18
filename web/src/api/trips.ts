@@ -17,6 +17,8 @@ export interface CreateTripData {
   notes?: string
 }
 
+export type UpdateTripData = CreateTripData
+
 function authHeaders(): Record<string, string> {
   const token = getAuthToken()
   return token ? { Authorization: `Bearer ${token}` } : {}
@@ -39,6 +41,19 @@ export async function createTrip(data: CreateTripData): Promise<Trip> {
   if (!res.ok) {
     const error = (await res.json()) as { errors?: string[] }
     throw new Error(error.errors?.join(', ') || 'Failed to create trip')
+  }
+  return res.json() as Promise<Trip>
+}
+
+export async function updateTrip(id: number, data: UpdateTripData): Promise<Trip> {
+  const res = await fetch(`${API_BASE_URL}/trips/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ trip: data }),
+  })
+  if (!res.ok) {
+    const error = (await res.json()) as { errors?: string[] }
+    throw new Error(error.errors?.join(', ') || 'Failed to update trip')
   }
   return res.json() as Promise<Trip>
 }

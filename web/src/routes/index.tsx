@@ -5,6 +5,7 @@ import {
   Plane,
   Plus,
   Trash2,
+  Pencil,
   Calendar as CalendarIcon,
   MapPin,
   StickyNote,
@@ -14,7 +15,7 @@ import {
   CheckCircle,
   RefreshCw,
 } from 'lucide-react'
-import { fetchTrips, createTrip, deleteTrip, type Trip } from '@/api/trips'
+import { fetchTrips, createTrip, updateTrip, deleteTrip, type Trip } from '@/api/trips'
 import { getAuthToken } from '@/api/auth'
 import {
   generateTravelerProfile,
@@ -97,6 +98,11 @@ function TripsPage() {
   const [formError, setFormError] = useState<string | null>(null)
   const [form, setForm] = useState({ destination: '', trip_date: '', notes: '' })
 
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null)
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false)
+  const [editFormError, setEditFormError] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({ destination: '', trip_date: '', notes: '' })
+
   useEffect(() => {
     fetchTrips().then(setTrips).catch(() => {})
   }, [])
@@ -125,6 +131,35 @@ function TripsPage() {
       )
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const openEditModal = (trip: Trip) => {
+    setEditFormError(null)
+    setEditForm({
+      destination: trip.destination,
+      trip_date: trip.trip_date,
+      notes: trip.notes ?? '',
+    })
+    setEditingTrip(trip)
+  }
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingTrip) return
+    setIsEditSubmitting(true)
+    setEditFormError(null)
+    try {
+      await updateTrip(editingTrip.id, { ...editForm, notes: editForm.notes || undefined })
+      const updated = await fetchTrips()
+      setTrips(updated)
+      setEditingTrip(null)
+    } catch (err) {
+      setEditFormError(
+        err instanceof Error ? err.message : 'Failed to update trip',
+      )
+    } finally {
+      setIsEditSubmitting(false)
     }
   }
 
@@ -204,6 +239,7 @@ function TripsPage() {
                     key={trip.id}
                     trip={trip}
                     onDelete={handleDelete}
+                    onEdit={openEditModal}
                     isDeleting={deletingId === trip.id}
                   />
                 ))}
@@ -223,6 +259,17 @@ function TripsPage() {
         isSubmitting={isSubmitting}
         error={formError}
       />
+
+      {/* ── Edit Modal ───────────────────────────────────────── */}
+      <EditTripModal
+        open={editingTrip !== null}
+        form={editForm}
+        onChange={setEditForm}
+        onSubmit={handleEdit}
+        onClose={() => setEditingTrip(null)}
+        isSubmitting={isEditSubmitting}
+        error={editFormError}
+      />
     </div>
   )
 }
@@ -232,10 +279,12 @@ function TripsPage() {
 function TripCard({
   trip,
   onDelete,
+  onEdit,
   isDeleting,
 }: {
   trip: Trip
   onDelete: (id: number) => void
+  onEdit: (trip: Trip) => void
   isDeleting: boolean
 }) {
   const upcoming = isUpcoming(trip.trip_date)
@@ -283,21 +332,32 @@ function TripCard({
           )}
         </div>
 
-        {/* Delete */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(trip.id)}
-          disabled={isDeleting}
-          aria-label={`Delete trip to ${trip.destination}`}
-          className="shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-        >
-          {isDeleting ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : (
-            <Trash2 size={15} />
-          )}
-        </Button>
+        {/* Actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(trip)}
+            aria-label={`Edit trip to ${trip.destination}`}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Pencil size={15} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(trip.id)}
+            disabled={isDeleting}
+            aria-label={`Delete trip to ${trip.destination}`}
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          >
+            {isDeleting ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <Trash2 size={15} />
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
@@ -447,6 +507,141 @@ function CreateTripModal({
                 </>
               ) : (
                 'Add Trip'
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function EditTripModal({
+  open,
+  form,
+  onChange,
+  onSubmit,
+  onClose,
+  isSubmitting,
+  error,
+}: {
+  open: boolean
+  form: { destination: string; trip_date: string; notes: string }
+  onChange: (form: {
+    destination: string
+    trip_date: string
+    notes: string
+  }) => void
+  onSubmit: (e: React.FormEvent) => void
+  onClose: () => void
+  isSubmitting: boolean
+  error: string | null
+}) {
+  const [calendarOpen, setCalendarOpen] = useState(false)
+
+  const selectedDate = form.trip_date
+    ? new Date(form.trip_date + 'T00:00:00')
+    : undefined
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil size={16} className="text-muted-foreground" />
+            Edit Trip
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={onSubmit} className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-destination">
+              Destination <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="edit-destination"
+              type="text"
+              required
+              autoFocus
+              value={form.destination}
+              onChange={(e) => onChange({ ...form, destination: e.target.value })}
+              placeholder="e.g. Tokyo, Japan"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>
+              Trip Date <span className="text-destructive">*</span>
+            </Label>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                  data-empty={!form.trip_date}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, 'PPP') : 'Pick a date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    onChange({
+                      ...form,
+                      trip_date: date ? format(date, 'yyyy-MM-dd') : '',
+                    })
+                    setCalendarOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+            <input type="hidden" name="trip_date" value={form.trip_date} required />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-notes">
+              Notes{' '}
+              <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
+            <Textarea
+              id="edit-notes"
+              value={form.notes}
+              onChange={(e) => onChange({ ...form, notes: e.target.value })}
+              placeholder="Anything to remember about this trip..."
+              rows={3}
+              className="resize-none"
+            />
+          </div>
+
+          <DialogFooter className="pt-1 gap-2">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" className="flex-1">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                'Save Changes'
               )}
             </Button>
           </DialogFooter>

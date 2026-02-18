@@ -1,11 +1,15 @@
 class TripsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_trip, only: [:show, :destroy]
+  before_action :set_trip, only: [:show, :update, :destroy]
 
   # GET /trips
   def index
     @trips = current_user.trips.order(
-      Arel.sql("CASE WHEN trip_date >= CURRENT_DATE THEN 0 ELSE 1 END, trip_date ASC")
+      Arel.sql(
+        "CASE WHEN trip_date >= CURRENT_DATE THEN 0 ELSE 1 END ASC, " \
+        "CASE WHEN trip_date >= CURRENT_DATE THEN trip_date END ASC, " \
+        "trip_date DESC"
+      )
     )
     render json: @trips
   end
@@ -21,6 +25,15 @@ class TripsController < ApplicationController
 
     if @trip.save
       render json: @trip, status: :created
+    else
+      render json: { errors: @trip.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  # PATCH /trips/:id
+  def update
+    if @trip.update(trip_params)
+      render json: @trip
     else
       render json: { errors: @trip.errors.full_messages }, status: :unprocessable_entity
     end

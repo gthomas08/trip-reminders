@@ -23,7 +23,7 @@ Rails.application.routes.draw do
   post "signin", to: "sessions#create"
 
   # Trip resources
-  resources :trips, only: [:index, :show, :create, :destroy]
+  resources :trips, only: [:index, :show, :create, :update, :destroy]
 
   # Traveler profile background job showcase
   post "traveler_profile/generate", to: "traveler_profile#generate"
