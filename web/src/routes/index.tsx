@@ -1,10 +1,11 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
+import { format } from 'date-fns'
 import {
   Plane,
   Plus,
   Trash2,
-  Calendar,
+  Calendar as CalendarIcon,
   MapPin,
   StickyNote,
   Loader2,
@@ -42,6 +43,12 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 
 export const Route = createFileRoute('/')({
   beforeLoad: () => {
@@ -271,7 +278,7 @@ function TripCard({
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-            <Calendar size={12} className="shrink-0" />
+            <CalendarIcon size={12} className="shrink-0" />
             <span>{formatDate(trip.trip_date)}</span>
           </div>
 
@@ -342,6 +349,12 @@ function CreateTripModal({
   isSubmitting: boolean
   error: string | null
 }) {
+  const [calendarOpen, setCalendarOpen] = useState(false)
+
+  const selectedDate = form.trip_date
+    ? new Date(form.trip_date + 'T00:00:00')
+    : undefined
+
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md">
@@ -376,16 +389,36 @@ function CreateTripModal({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="trip_date">
+            <Label>
               Trip Date <span className="text-destructive">*</span>
             </Label>
-            <Input
-              id="trip_date"
-              type="date"
-              required
-              value={form.trip_date}
-              onChange={(e) => onChange({ ...form, trip_date: e.target.value })}
-            />
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                  data-empty={!form.trip_date}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, 'PPP') : 'Pick a date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    onChange({
+                      ...form,
+                      trip_date: date ? format(date, 'yyyy-MM-dd') : '',
+                    })
+                    setCalendarOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+            <input type="hidden" name="trip_date" value={form.trip_date} required />
           </div>
 
           <div className="space-y-1.5">
