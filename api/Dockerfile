@@ -2,8 +2,8 @@
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t trip_reminders_api .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name trip_reminders_api trip_reminders_api
+# docker build -t api .
+# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name api api
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 

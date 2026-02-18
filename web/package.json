@@ -1,5 +1,5 @@
 {
-  "name": "trip_reminders_frontend",
+  "name": "web",
   "private": true,
   "type": "module",
   "imports": {

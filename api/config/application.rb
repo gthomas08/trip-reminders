@@ -31,6 +31,6 @@ module TripRemindersApi
 
     # Enable sessions for Sidekiq::Web
     config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore, key: '_trip_reminders_session'
+    config.middleware.use ActionDispatch::Session::CookieStore, key: '_api_session'
   end
 end

@@ -16,7 +16,7 @@ Users can register trips with a destination, date, and optional notes.
 ```
 .
 ├── docker-compose.yml              # Infrastructure (PostgreSQL, Redis)
-├── trip_reminders_api/              # Rails API backend
+├── api/                             # Rails API backend
 │   ├── app/
 │   │   ├── controllers/            # REST API endpoints
 │   │   ├── models/                 # Trip model
@@ -27,7 +27,7 @@ Users can register trips with a destination, date, and optional notes.
 │   └── db/
 │       └── migrate/                # Database migrations
 │
-└── trip_reminders_frontend/         # TanStack Start frontend
+└── web/                             # TanStack Start frontend
     ├── src/
     │   ├── api/
     │   │   └── trips.ts            # Typed API client
@@ -59,15 +59,15 @@ docker-compose up -d
 
 This starts:
 - **PostgreSQL** on port 5432
-  - Database: `trip_reminders_api_development`
-  - User: `trip_reminders`
-  - Password: `trip_reminders_dev`
+  - Database: `api_development`
+  - User: `api`
+  - Password: `api_dev`
 - **Redis** on port 6379
 
 ### 2. Backend Setup
 
 ```bash
-cd trip_reminders_api
+cd api
 
 # Install dependencies
 bundle install
@@ -97,7 +97,7 @@ foreman start
 ### 3. Frontend Setup
 
 ```bash
-cd trip_reminders_frontend
+cd web
 
 # Install dependencies
 npm install
