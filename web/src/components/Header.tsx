@@ -1,9 +1,25 @@
-import { Link } from '@tanstack/react-router'
-import { Plane } from 'lucide-react'
+import { Link, useRouter } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
+import { Plane, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { signOut, getAuthEmail, isAuthenticated } from '@/api/auth'
 
 export default function Header() {
+  const router = useRouter()
+  const [authenticated, setAuthenticated] = useState(false)
+  const [email, setEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    setAuthenticated(isAuthenticated())
+    setEmail(getAuthEmail())
+  }, [])
+
+  const handleSignOut = () => {
+    signOut()
+    void router.navigate({ to: '/signin' })
+  }
+
   return (
     <header className="bg-background border-b">
       <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
@@ -30,6 +46,32 @@ export default function Header() {
             </Link>
           </Button>
         </nav>
+
+        {/* Auth actions */}
+        <div className="flex items-center gap-2 shrink-0">
+          {authenticated ? (
+            <>
+              {email && (
+                <span className="text-xs text-muted-foreground hidden sm:block">
+                  {email}
+                </span>
+              )}
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign out</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/signin">Sign in</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to="/signup">Sign up</Link>
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   )

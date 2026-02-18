@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import {
   Plane,
@@ -14,6 +14,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { fetchTrips, createTrip, deleteTrip, type Trip } from '@/api/trips'
+import { getAuthToken } from '@/api/auth'
 import {
   generateTravelerProfile,
   getTravelerProfileStatus,
@@ -43,6 +44,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 
 export const Route = createFileRoute('/')({
+  beforeLoad: () => {
+    if (!getAuthToken()) {
+      throw redirect({ to: '/signin' })
+    }
+  },
   loader: async () => {
     const trips = await fetchTrips()
     return { trips }
