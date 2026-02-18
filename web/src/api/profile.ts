@@ -5,7 +5,7 @@ const API_BASE_URL = 'http://localhost:3000'
 export type ProfileStatus =
   | { status: 'idle' }
   | { status: 'running'; started_at: string }
-  | { status: 'complete'; profile: string; generated_at: string }
+  | { status: 'complete'; traveler_type: string; generated_at: string }
 
 function authHeaders(): Record<string, string> {
   const token = getAuthToken()

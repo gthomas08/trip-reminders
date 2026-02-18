@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { UserPlus, Loader2, AlertCircle } from 'lucide-react'
-import { signUp } from '@/api/auth'
+import { signUp, getAuthToken } from '@/api/auth'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -15,6 +15,9 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export const Route = createFileRoute('/signup')({
+  beforeLoad: () => {
+    if (typeof window !== 'undefined' && getAuthToken()) throw redirect({ to: '/' })
+  },
   component: SignUpPage,
 })
 

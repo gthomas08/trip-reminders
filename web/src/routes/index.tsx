@@ -45,11 +45,12 @@ import { Separator } from '@/components/ui/separator'
 
 export const Route = createFileRoute('/')({
   beforeLoad: () => {
-    if (!getAuthToken()) {
+    if (typeof window !== 'undefined' && !getAuthToken()) {
       throw redirect({ to: '/signin' })
     }
   },
   loader: async () => {
+    if (typeof window === 'undefined') return { trips: [] }
     const trips = await fetchTrips()
     return { trips }
   },
@@ -437,7 +438,7 @@ type PanelState = 'idle' | 'running' | 'complete'
 
 function TravelerProfilePanel() {
   const [state, setState] = useState<PanelState>('idle')
-  const [profile, setProfile] = useState<string | null>(null)
+  const [travelerType, setTravelerType] = useState<string | null>(null)
   const [generatedAt, setGeneratedAt] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -448,28 +449,13 @@ function TravelerProfilePanel() {
     }
   }
 
-  useEffect(() => {
-    return () => stopPolling()
-  }, [])
-
-  const handleGenerate = async () => {
-    setState('running')
-    setProfile(null)
-    setGeneratedAt(null)
-
-    try {
-      await generateTravelerProfile()
-    } catch {
-      setState('idle')
-      return
-    }
-
+  const startPolling = () => {
     pollRef.current = setInterval(async () => {
       try {
         const status = await getTravelerProfileStatus()
         if (status.status === 'complete') {
           stopPolling()
-          setProfile(status.profile)
+          setTravelerType(status.traveler_type)
           setGeneratedAt(status.generated_at)
           setState('complete')
         }
@@ -480,10 +466,41 @@ function TravelerProfilePanel() {
     }, 1000)
   }
 
+  useEffect(() => {
+    getTravelerProfileStatus()
+      .then((status) => {
+        if (status.status === 'complete') {
+          setTravelerType(status.traveler_type)
+          setGeneratedAt(status.generated_at)
+          setState('complete')
+        } else if (status.status === 'running') {
+          setState('running')
+          startPolling()
+        }
+      })
+      .catch(() => {})
+    return () => stopPolling()
+  }, [])
+
+  const handleGenerate = async () => {
+    setState('running')
+    setTravelerType(null)
+    setGeneratedAt(null)
+
+    try {
+      await generateTravelerProfile()
+    } catch {
+      setState('idle')
+      return
+    }
+
+    startPolling()
+  }
+
   const handleRegenerate = () => {
     stopPolling()
     setState('idle')
-    setProfile(null)
+    setTravelerType(null)
     setGeneratedAt(null)
   }
 
@@ -543,7 +560,7 @@ function TravelerProfilePanel() {
           </div>
         )}
 
-        {state === 'complete' && profile && (
+        {state === 'complete' && travelerType && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle size={15} className="text-green-600 dark:text-green-400" />
@@ -554,12 +571,10 @@ function TravelerProfilePanel() {
                 </span>
               )}
             </div>
-            <div className="rounded-md border bg-muted/40 px-4 py-4 space-y-3">
-              {profile.split('\n\n').map((paragraph, i) => (
-                <p key={i} className="text-sm text-muted-foreground leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
+            <div className="rounded-md border bg-muted/40 px-4 py-4 flex items-center justify-center">
+              <span className="text-2xl font-semibold capitalize tracking-wide">
+                {travelerType}
+              </span>
             </div>
           </div>
         )}
