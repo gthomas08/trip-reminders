@@ -4,38 +4,41 @@ A full-stack application for managing trip reminders, built with Ruby on Rails, 
 
 ## Overview
 
-This project demonstrates a simple but complete application using:
-- **Rails API** — RESTful backend with PostgreSQL
+This project demonstrates a complete application using:
+- **Rails API** — RESTful backend with PostgreSQL, token-based authentication, and background jobs
 - **TanStack Start** — Full-stack React framework with file-based routing, SSR, and TypeScript
-- **Sidekiq** — Background job processing
+- **Sidekiq** — Background job processing (traveler profile generation)
+- **shadcn/ui** — Accessible component library built on Radix UI and Tailwind CSS
 
-Users can register trips with a destination, date, and optional notes.
+Users can register, sign in, and manage trip reminders. A background job showcase generates an AI-style "traveler type" profile for each user.
 
 ## Project Structure
 
 ```
 .
 ├── docker-compose.yml              # Infrastructure (PostgreSQL, Redis)
-├── api/                             # Rails API backend
+├── api/                            # Rails API backend
 │   ├── app/
-│   │   ├── controllers/            # REST API endpoints
-│   │   ├── models/                 # Trip model
-│   │   └── jobs/                   # Sidekiq jobs
+│   │   ├── controllers/            # REST API endpoints + auth concern
+│   │   ├── models/                 # User, Trip
+│   │   └── jobs/                   # GenerateTravelerProfileJob
 │   ├── config/
-│   │   ├── initializers/           # CORS, Sidekiq config
-│   │   └── sidekiq.yml             # Scheduled jobs
+│   │   ├── initializers/           # CORS config
+│   │   └── routes.rb               # API routes + Sidekiq Web UI
 │   └── db/
 │       └── migrate/                # Database migrations
 │
-└── web/                             # TanStack Start frontend
+└── web/                            # TanStack Start frontend
     ├── src/
-    │   ├── api/
-    │   │   └── trips.ts            # Typed API client
+    │   ├── api/                    # Typed API clients (auth, trips, profile)
     │   ├── components/
-    │   │   └── Header.tsx          # App header
+    │   │   ├── Header.tsx          # App header
+    │   │   └── ui/                 # shadcn/ui components
     │   ├── routes/
     │   │   ├── __root.tsx          # Root layout
-    │   │   └── index.tsx           # Trips dashboard
+    │   │   ├── index.tsx           # Trips dashboard
+    │   │   ├── signin.tsx          # Sign in page
+    │   │   └── signup.tsx          # Sign up page
     │   └── styles.css
     ├── vite.config.ts
     └── package.json
@@ -87,13 +90,6 @@ The API will be available at `http://localhost:3000`.
 
 **Sidekiq Web UI**: Visit `http://localhost:3000/sidekiq` (login: `admin` / `admin`) to monitor background jobs.
 
-Alternatively, use Foreman to run both Rails and Sidekiq together:
-
-```bash
-gem install foreman
-foreman start
-```
-
 ### 3. Frontend Setup
 
 ```bash
@@ -111,27 +107,52 @@ The frontend will be available at `http://localhost:5173`.
 ## Usage
 
 1. Open the app at `http://localhost:5173`
-2. Click **Add Trip** to create a trip (destination, date, optional notes)
-3. View all trips sorted by date with upcoming/past badges
-4. Delete trips with the trash icon on each card
+2. **Sign up** with an email and password
+3. Click **Add Trip** to create a trip (destination, date, optional notes)
+4. View all trips — upcoming trips are sorted first, past trips below
+5. Edit or delete trips with the action icons on each card
+6. Generate your **Traveler Profile** — a background job assigns you a traveler type (e.g. adventurer, nomad, globetrotter)
 
 ## API Endpoints
 
-- `GET /trips` — List all trips (ordered by date ascending)
+### Authentication
+
+- `POST /signup` — Register a new user
+  ```json
+  { "user": { "email": "you@example.com", "password": "secret123", "password_confirmation": "secret123" } }
+  ```
+  Returns: `{ "token": "...", "email": "..." }`
+
+- `POST /signin` — Authenticate an existing user
+  ```json
+  { "email": "you@example.com", "password": "secret123" }
+  ```
+  Returns: `{ "token": "...", "email": "..." }`
+
+All endpoints below require the token in the `Authorization` header:
+```
+Authorization: <token>
+```
+
+### Trips
+
+- `GET /trips` — List all trips for the current user (upcoming first)
 - `POST /trips` — Create a new trip
   ```json
-  {
-    "trip": {
-      "destination": "Paris, France",
-      "trip_date": "2024-03-15",
-      "notes": "Visiting the Eiffel Tower"
-    }
-  }
+  { "trip": { "destination": "Paris, France", "trip_date": "2026-06-15", "notes": "Visiting the Eiffel Tower" } }
   ```
 - `GET /trips/:id` — Get a specific trip
+- `PATCH /trips/:id` — Update a trip
 - `DELETE /trips/:id` — Delete a trip
 
+### Traveler Profile
+
+- `POST /traveler_profile/generate` — Enqueue a background job to generate the user's traveler type
+- `GET /traveler_profile/status` — Poll the job status (`idle` → `running` → `complete`)
+
 ## Environment Variables
+
+Copy `api/.env.example` to `api/.env` and adjust as needed.
 
 **Backend:**
 - `REDIS_URL` — Redis connection URL (default: `redis://localhost:6379/0`)
@@ -156,19 +177,16 @@ docker-compose down -v
 
 - **Ruby on Rails 8.1** — API framework
 - **PostgreSQL** — Database
-- **Sidekiq** — Background jobs
+- **Solid Queue / Cache / Cable** — Rails 8 database-backed adapters
+- **Sidekiq** — Background job processing
+- **bcrypt** — Password hashing (`has_secure_password`)
 - **rack-cors** — CORS handling
+- **RSpec + Rswag** — Testing and OpenAPI documentation
 - **TanStack Start** — Full-stack React framework (SSR, file-based routing)
 - **TanStack Router** — Type-safe client-side routing
 - **React 19** — UI library
 - **TypeScript** — End-to-end type safety
 - **Tailwind CSS v4** — Styling
+- **shadcn/ui** — Component library (Radix UI primitives)
+- **Vitest** — Frontend unit testing
 - **Vite** — Build tool
-
-## Next Steps
-
-- Add user authentication
-- Implement email notifications via ActionMailer
-- Add trip editing functionality
-- Add filtering and sorting
-- Add tests (Minitest for Rails, Vitest for frontend)
