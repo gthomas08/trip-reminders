@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   unless Rails.env.production?
+    Sidekiq::Web.use Rack::Auth::Basic do |u, p|
+      [u, p] == ["admin", "admin"]
+    end
     mount Sidekiq::Web => "/sidekiq"
   end
 

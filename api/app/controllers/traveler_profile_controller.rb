@@ -3,9 +3,10 @@ class TravelerProfileController < ApplicationController
 
   # POST /traveler_profile/generate
   def generate
-    return head :conflict if current_user.profile_generating?
+    updated = User.where(id: current_user.id, profile_generating: false)
+                  .update_all(profile_generating: true, traveler_type: nil)
+    return head :conflict if updated == 0
 
-    current_user.start_profile_generation!
     GenerateTravelerProfileJob.perform_later(current_user.id)
     head :accepted
   end
