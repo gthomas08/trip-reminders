@@ -16,6 +16,10 @@ class User < ApplicationRecord
 
   before_create :generate_token
 
+  def regenerate_token!
+    update!(token: SecureRandom.hex(32))
+  end
+
   private
 
   def generate_token

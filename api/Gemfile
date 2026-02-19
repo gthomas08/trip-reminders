@@ -38,6 +38,12 @@ gem "rack-cors"
 # Background job processing with Sidekiq
 gem "sidekiq"
 
+# Pagination
+gem "pagy"
+
+# Rate limiting
+gem "rack-attack"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -53,6 +59,9 @@ group :development, :test do
 
   # RSpec for testing
   gem "rspec-rails"
+
+  # Test factories
+  gem "factory_bot_rails"
 
   # Rswag for OpenAPI/Swagger documentation
   gem "rswag"

@@ -9,7 +9,7 @@ module Authenticatable
     token = extract_bearer_token
     @current_user = User.find_by(token: token) if token
 
-    render json: { error: "Unauthorized" }, status: :unauthorized unless @current_user
+    render json: { errors: [ "Unauthorized" ] }, status: :unauthorized unless @current_user
   end
 
   def current_user

@@ -3,9 +3,7 @@ class TravelerProfileController < ApplicationController
 
   # POST /traveler_profile/generate
   def generate
-    Sidekiq.redis do |conn|
-      conn.set(redis_key, JSON.dump({ status: "running", started_at: Time.now.iso8601 }))
-    end
+    current_user.update!(profile_generating: true, traveler_type: nil)
     GenerateTravelerProfileJob.perform_later(current_user.id)
     head :accepted
   end
@@ -18,15 +16,10 @@ class TravelerProfileController < ApplicationController
         traveler_type: current_user.traveler_type,
         generated_at: current_user.updated_at.iso8601
       }
+    elsif current_user.profile_generating?
+      render json: { status: "running" }
     else
-      raw = Sidekiq.redis { |conn| conn.get(redis_key) }
-      render json: raw ? JSON.parse(raw) : { status: "idle" }
+      render json: { status: "idle" }
     end
-  end
-
-  private
-
-  def redis_key
-    "traveler_profile_status:#{current_user.id}"
   end
 end

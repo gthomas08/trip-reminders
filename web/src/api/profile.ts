@@ -1,11 +1,7 @@
-import { getAuthToken } from './auth'
+import { API_BASE_URL, getAuthToken } from './auth'
+import { ProfileStatusSchema, type ProfileStatus } from '#/lib/schemas'
 
-const API_BASE_URL = 'http://localhost:3000'
-
-export type ProfileStatus =
-  | { status: 'idle' }
-  | { status: 'running'; started_at: string }
-  | { status: 'complete'; traveler_type: string; generated_at: string }
+export type { ProfileStatus }
 
 function authHeaders(): Record<string, string> {
   const token = getAuthToken()
@@ -25,5 +21,5 @@ export async function getTravelerProfileStatus(): Promise<ProfileStatus> {
     headers: authHeaders(),
   })
   if (!res.ok) throw new Error(`Failed to fetch profile status: ${res.status}`)
-  return res.json() as Promise<ProfileStatus>
+  return ProfileStatusSchema.parse(await res.json())
 }

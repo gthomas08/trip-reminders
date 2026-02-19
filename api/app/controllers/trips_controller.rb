@@ -4,14 +4,15 @@ class TripsController < ApplicationController
 
   # GET /trips
   def index
-    @trips = current_user.trips.order(
-      Arel.sql(
-        "CASE WHEN trip_date >= CURRENT_DATE THEN 0 ELSE 1 END ASC, " \
-        "CASE WHEN trip_date >= CURRENT_DATE THEN trip_date END ASC, " \
-        "trip_date DESC"
-      )
+    pagy_request = Pagy::Request.new(request: request, limit: Pagy.options[:limit])
+    pagy, trips = Pagy::OffsetPaginator.paginate(
+      current_user.trips.sorted_by_date,
+      request: pagy_request
     )
-    render json: @trips
+    render json: {
+      trips: trips,
+      meta: { count: pagy.count, page: pagy.page, pages: pagy.pages, limit: pagy.limit }
+    }
   end
 
   # GET /trips/:id

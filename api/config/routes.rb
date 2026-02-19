@@ -19,8 +19,9 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => "/sidekiq"
 
   # Authentication
-  post "signup", to: "registrations#create"
-  post "signin", to: "sessions#create"
+  post   "signup",  to: "registrations#create"
+  post   "signin",  to: "sessions#create"
+  delete "signout", to: "sessions#destroy"
 
   # Trip resources
   resources :trips, only: [:index, :show, :create, :update, :destroy]

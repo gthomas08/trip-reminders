@@ -1,14 +1,9 @@
-const API_BASE_URL = 'http://localhost:3000'
+import { AuthResponseSchema, type AuthResponse } from '#/lib/schemas'
 
-export interface AuthResponse {
-  token: string
-  email: string
-}
-
-export interface AuthError {
-  error?: string
-  errors?: string[]
-}
+export const API_BASE_URL =
+  typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
+    ? import.meta.env.VITE_API_URL
+    : 'http://localhost:3000'
 
 export async function signUp(
   email: string,
@@ -23,16 +18,16 @@ export async function signUp(
     }),
   })
 
-  const data = (await res.json()) as AuthResponse & AuthError
+  const data = (await res.json()) as unknown
   if (!res.ok) {
-    const message =
-      data.errors?.join(', ') ?? data.error ?? 'Sign up failed'
-    throw new Error(message)
+    const err = data as { errors?: string[] }
+    throw new Error(err.errors?.join(', ') ?? 'Sign up failed')
   }
 
-  localStorage.setItem('auth_token', data.token)
-  localStorage.setItem('auth_email', data.email)
-  return { token: data.token, email: data.email }
+  const parsed = AuthResponseSchema.parse(data)
+  localStorage.setItem('auth_token', parsed.token)
+  localStorage.setItem('auth_email', parsed.email)
+  return parsed
 }
 
 export async function signIn(
@@ -45,18 +40,31 @@ export async function signIn(
     body: JSON.stringify({ email, password }),
   })
 
-  const data = (await res.json()) as AuthResponse & AuthError
+  const data = (await res.json()) as unknown
   if (!res.ok) {
-    throw new Error(data.error ?? 'Sign in failed')
+    const err = data as { errors?: string[] }
+    throw new Error(err.errors?.[0] ?? 'Sign in failed')
   }
 
-  localStorage.setItem('auth_token', data.token)
-  localStorage.setItem('auth_email', data.email)
-  return { token: data.token, email: data.email }
+  const parsed = AuthResponseSchema.parse(data)
+  localStorage.setItem('auth_token', parsed.token)
+  localStorage.setItem('auth_email', parsed.email)
+  return parsed
 }
 
-export function signOut(): void {
+export async function signOut(): Promise<void> {
   if (typeof window === 'undefined') return
+  const token = localStorage.getItem('auth_token')
+  if (token) {
+    try {
+      await fetch(`${API_BASE_URL}/signout`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    } catch {
+      // Clear locally even if the request fails
+    }
+  }
   localStorage.removeItem('auth_token')
   localStorage.removeItem('auth_email')
 }

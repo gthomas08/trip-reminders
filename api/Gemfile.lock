@@ -105,6 +105,11 @@ GEM
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
+    factory_bot (6.5.6)
+      activesupport (>= 6.1.0)
+    factory_bot_rails (6.5.1)
+      factory_bot (~> 6.5)
+      railties (>= 6.1.0)
     ffi (1.17.3-aarch64-linux-gnu)
     ffi (1.17.3-arm64-darwin)
     ffi (1.17.3-x86_64-linux-gnu)
@@ -180,6 +185,10 @@ GEM
     nokogiri (1.19.1-x86_64-linux-gnu)
       racc (~> 1.4)
     ostruct (0.6.3)
+    pagy (43.2.10)
+      json
+      uri
+      yaml
     parallel (1.27.0)
     parser (3.3.10.2)
       ast (~> 2.4.1)
@@ -200,6 +209,8 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.5)
+    rack-attack (6.8.0)
+      rack (>= 1.0, < 4)
     rack-cors (3.0.0)
       logger
       rack (>= 3.0.14)
@@ -363,6 +374,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    yaml (0.4.0)
     zeitwerk (2.7.4)
 
 PLATFORMS
@@ -376,10 +388,13 @@ DEPENDENCIES
   brakeman
   bundler-audit
   debug
+  factory_bot_rails
   image_processing (~> 1.2)
   kamal
+  pagy
   pg (~> 1.1)
   puma (>= 5.0)
+  rack-attack
   rack-cors
   rails (~> 8.1.2)
   rspec-rails

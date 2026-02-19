@@ -1,15 +1,12 @@
-import { getAuthToken } from './auth'
+import { API_BASE_URL, getAuthToken } from './auth'
+import {
+  TripSchema,
+  TripsResponseSchema,
+  type Trip,
+  type TripsResponse,
+} from '#/lib/schemas'
 
-const API_BASE_URL = 'http://localhost:3000'
-
-export interface Trip {
-  id: number
-  destination: string
-  trip_date: string
-  notes: string | null
-  created_at: string
-  updated_at: string
-}
+export type { Trip }
 
 export interface CreateTripData {
   destination: string
@@ -24,12 +21,12 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-export async function fetchTrips(): Promise<Trip[]> {
+export async function fetchTrips(): Promise<TripsResponse> {
   const res = await fetch(`${API_BASE_URL}/trips`, {
     headers: authHeaders(),
   })
   if (!res.ok) throw new Error(`Failed to fetch trips: ${res.status}`)
-  return res.json() as Promise<Trip[]>
+  return TripsResponseSchema.parse(await res.json())
 }
 
 export async function createTrip(data: CreateTripData): Promise<Trip> {
@@ -42,7 +39,7 @@ export async function createTrip(data: CreateTripData): Promise<Trip> {
     const error = (await res.json()) as { errors?: string[] }
     throw new Error(error.errors?.join(', ') || 'Failed to create trip')
   }
-  return res.json() as Promise<Trip>
+  return TripSchema.parse(await res.json())
 }
 
 export async function updateTrip(id: number, data: UpdateTripData): Promise<Trip> {
@@ -55,7 +52,7 @@ export async function updateTrip(id: number, data: UpdateTripData): Promise<Trip
     const error = (await res.json()) as { errors?: string[] }
     throw new Error(error.errors?.join(', ') || 'Failed to update trip')
   }
-  return res.json() as Promise<Trip>
+  return TripSchema.parse(await res.json())
 }
 
 export async function deleteTrip(id: number): Promise<void> {

@@ -5,10 +5,9 @@ class GenerateTravelerProfileJob < ApplicationJob
     sleep(3)
 
     user = User.find(user_id)
-    user.update!(traveler_type: User::TRAVELER_TYPES.sample)
-
-    Sidekiq.redis do |conn|
-      conn.del("traveler_profile_status:#{user_id}")
-    end
+    user.update!(
+      traveler_type: User::TRAVELER_TYPES.sample,
+      profile_generating: false
+    )
   end
 end
