@@ -47,6 +47,7 @@ RSpec.describe User, type: :model do
 
       it "accepts passwords of 8+ characters" do
         user.password = "longenoughpassword"
+        user.password_confirmation = "longenoughpassword"
         expect(user).to be_valid
       end
     end

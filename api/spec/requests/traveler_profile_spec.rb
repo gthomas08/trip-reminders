@@ -45,6 +45,12 @@ RSpec.describe "TravelerProfile", type: :request do
       expect(user.reload.traveler_type).to be_nil
     end
 
+    it "returns 409 when already generating" do
+      user.update!(profile_generating: true)
+      post "/traveler_profile/generate", headers: auth_headers
+      expect(response).to have_http_status(:conflict)
+    end
+
     it "returns 401 when unauthenticated" do
       post "/traveler_profile/generate"
       expect(response).to have_http_status(:unauthorized)

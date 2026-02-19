@@ -4,14 +4,13 @@ class TripsController < ApplicationController
 
   # GET /trips
   def index
-    pagy_request = Pagy::Request.new(request: request, limit: Pagy.options[:limit])
     pagy, trips = Pagy::OffsetPaginator.paginate(
       current_user.trips.sorted_by_date,
-      request: pagy_request
+      request: Pagy::Request.new(request:)
     )
     render json: {
       trips: trips,
-      meta: { count: pagy.count, page: pagy.page, pages: pagy.pages, limit: pagy.limit }
+      meta: { count: pagy.count, page: pagy.page, pages: pagy.last, limit: pagy.limit }
     }
   end
 

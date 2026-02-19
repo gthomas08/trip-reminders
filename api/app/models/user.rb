@@ -20,6 +20,10 @@ class User < ApplicationRecord
     update!(token: SecureRandom.hex(32))
   end
 
+  def start_profile_generation!
+    update!(profile_generating: true, traveler_type: nil)
+  end
+
   private
 
   def generate_token

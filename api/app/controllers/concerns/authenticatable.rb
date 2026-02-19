@@ -1,10 +1,6 @@
 module Authenticatable
   extend ActiveSupport::Concern
 
-  included do
-    helper_method :current_user if respond_to?(:helper_method)
-  end
-
   def authenticate_user!
     token = extract_bearer_token
     @current_user = User.find_by(token: token) if token
