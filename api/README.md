@@ -21,15 +21,12 @@ A Rails API backend for managing trip reminders.
 bundle install
 ```
 
-2. Set up the database:
+2. Set environment variables (see [Environment Variables](#environment-variables) below).
+
+3. Set up the database:
 ```bash
 rails db:create
 rails db:migrate
-```
-
-3. Configure Redis URL (optional, defaults to `redis://localhost:6379/0`):
-```bash
-export REDIS_URL=redis://localhost:6379/0
 ```
 
 ## Running the Application
@@ -97,8 +94,22 @@ db/
 
 ## Environment Variables
 
-- `REDIS_URL` - Redis connection URL (default: `redis://localhost:6379/0`)
+Set these in your shell or deployment environment. No `.env` file is used — variables must be exported directly.
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATABASE_NAME` | `api_development` | PostgreSQL database name |
+| `DATABASE_USER` | `api` | PostgreSQL username |
+| `DATABASE_PASSWORD` | `api_dev` | PostgreSQL password |
+| `DATABASE_HOST` | `localhost` | PostgreSQL host |
+| `DATABASE_PORT` | `5432` | PostgreSQL port |
+| `REDIS_URL` | `redis://localhost:6379/0` | Redis connection URL (Sidekiq) |
+| `ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost:5174` | Comma-separated list of allowed CORS origins |
+| `RAILS_MAX_THREADS` | `5` | Puma thread count and DB connection pool size |
+| `PORT` | `3000` | Port the server listens on |
+| `RAILS_ENV` | `development` | Rails environment |
 
 ## Notes
 
-- CORS is configured to allow requests from `http://localhost:5173` (Vite default) and `http://localhost:3000`.
+- CORS is configured via `ALLOWED_ORIGINS` to allow requests from your frontend origin(s).
+- Secrets (e.g. `secret_key_base`) are stored in `config/credentials.yml.enc`. Run `bin/rails credentials:edit` to manage them.
