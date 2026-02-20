@@ -1,12 +1,13 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  unless Rails.env.production?
-    Sidekiq::Web.use Rack::Auth::Basic do |u, p|
-      [u, p] == ["admin", "admin"]
-    end
-    mount Sidekiq::Web => "/sidekiq"
+  Sidekiq::Web.use Rack::Auth::Basic do |u, p|
+    expected_user = Rails.env.development? ? "admin" : ENV.fetch("SIDEKIQ_WEB_USER")
+    expected_pass = Rails.env.development? ? "admin" : ENV.fetch("SIDEKIQ_WEB_PASSWORD")
+    ActiveSupport::SecurityUtils.secure_compare(u, expected_user) &
+      ActiveSupport::SecurityUtils.secure_compare(p, expected_pass)
   end
+  mount Sidekiq::Web => "/sidekiq"
 
   post   "signup",  to: "registrations#create"
   post   "signin",  to: "sessions#create"
