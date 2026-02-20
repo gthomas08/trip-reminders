@@ -34,7 +34,7 @@ Users can register, sign in, and manage trip reminders. A background job showcas
     ├── src/
     │   ├── api/                    # Typed API clients (auth, trips, profile)
     │   ├── components/
-    │   │   ├── Header.tsx          # App header
+    │   │   ├── header.tsx          # App header
     │   │   └── ui/                 # shadcn/ui components
     │   ├── routes/
     │   │   ├── __root.tsx          # Root layout
@@ -154,7 +154,7 @@ Authorization: <token>
 
 ## Environment Variables
 
-Copy `api/.env.example` to `api/.env` and adjust as needed.
+Create `api/.env` with the following variables:
 
 **Backend:**
 - `REDIS_URL` — Redis connection URL (default: `redis://localhost:6379/0`)

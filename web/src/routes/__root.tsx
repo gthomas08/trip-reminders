@@ -1,7 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { useState, useEffect, createContext, useContext } from 'react'
 
-import Header from '../components/Header'
+import Header from '../components/header'
 
 import appCss from '../styles.css?url'
 
