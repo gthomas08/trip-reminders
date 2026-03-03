@@ -6,10 +6,10 @@ import {
   StickyNote,
   Loader2,
 } from 'lucide-react'
-import { Badge } from '#/components/ui/badge'
-import { Button } from '#/components/ui/button'
-import { Card, CardContent } from '#/components/ui/card'
-import type { Trip } from '#/lib/schemas'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import type { Trip } from '@/lib/schemas'
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {

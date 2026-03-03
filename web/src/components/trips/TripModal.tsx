@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { Plane, Pencil, CalendarIcon, Loader2, AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription } from '#/components/ui/alert'
-import { Button } from '#/components/ui/button'
-import { Calendar } from '#/components/ui/calendar'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Dialog,
   DialogContent,
@@ -11,15 +11,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '#/components/ui/dialog'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '#/components/ui/popover'
-import { Textarea } from '#/components/ui/textarea'
+} from '@/components/ui/popover'
+import { Textarea } from '@/components/ui/textarea'
 
 export type TripForm = {
   destination: string

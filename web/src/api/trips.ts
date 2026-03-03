@@ -4,7 +4,7 @@ import {
   TripsResponseSchema,
   type Trip,
   type TripsResponse,
-} from '#/lib/schemas'
+} from '@/lib/schemas'
 
 export type { Trip }
 

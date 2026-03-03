@@ -1,5 +1,5 @@
 import { API_BASE_URL, getAuthToken } from './auth'
-import { ProfileStatusSchema, type ProfileStatus } from '#/lib/schemas'
+import { ProfileStatusSchema, type ProfileStatus } from '@/lib/schemas'
 
 export type { ProfileStatus }
 

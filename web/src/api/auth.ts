@@ -1,4 +1,4 @@
-import { AuthResponseSchema, type AuthResponse } from '#/lib/schemas'
+import { AuthResponseSchema, type AuthResponse } from '@/lib/schemas'
 
 export const API_BASE_URL =
   typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL

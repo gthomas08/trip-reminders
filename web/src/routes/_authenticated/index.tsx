@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { Plane, Plus } from 'lucide-react'
-import { fetchTrips, createTrip, updateTrip, deleteTrip } from '#/api/trips'
-import type { Trip } from '#/lib/schemas'
-import { TripCard } from '#/components/trips/TripCard'
-import { TripModal, type TripForm } from '#/components/trips/TripModal'
-import { TravelerProfilePanel } from '#/components/trips/TravelerProfilePanel'
-import { EmptyState } from '#/components/trips/EmptyState'
-import { Button } from '#/components/ui/button'
+import { fetchTrips, createTrip, updateTrip, deleteTrip } from '@/api/trips'
+import type { Trip } from '@/lib/schemas'
+import { TripCard } from '@/components/trips/TripCard'
+import { TripModal, type TripForm } from '@/components/trips/TripModal'
+import { TravelerProfilePanel } from '@/components/trips/TravelerProfilePanel'
+import { EmptyState } from '@/components/trips/EmptyState'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_authenticated/')({
   component: TripsPage,

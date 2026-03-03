@@ -5,16 +5,16 @@ import {
   CheckCircle,
   RefreshCw,
 } from 'lucide-react'
-import { generateTravelerProfile, getTravelerProfileStatus } from '#/api/profile'
-import { Button } from '#/components/ui/button'
+import { generateTravelerProfile, getTravelerProfileStatus } from '@/api/profile'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '#/components/ui/card'
-import { Separator } from '#/components/ui/separator'
+} from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 type PanelState = 'idle' | 'running' | 'complete'
 
